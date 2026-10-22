@@ -1,2 +1,7 @@
-<!-- Save your AI-generated Mermaid flowchart source here (Tinker 3B, Part 4). -->
-<!-- Replace this comment with a fenced ```mermaid``` code block: input -> process/score -> output. -->
+flowchart TD
+    A["CSV study spots"] --> B["Load rows and convert numeric fields"]
+    B --> C["Score every spot and collect reasons"]
+    P["Student profile"] --> C
+    C --> D["Sort scores highest to lowest"]
+    D --> E["Select top k results"]
+    E --> F["Display names, scores, and reasons"]

@@ -146,6 +146,45 @@ I used an AI coding assistant to investigate the relevant Python code, understan
 
 I treated the AI suggestions as hypotheses. I checked the suggested boundary test against the conditions in `session_rating()`, ran the test suite, and confirmed that the program produced identical results after the refactor.
 
+## Part 2: Scoring Weights
+
+Noise matters most because it has the largest weight—three points.
+I prioritized it because noise can affect concentration.
+Distance contributes two points, and available seating contributes one point.
+
+## Part 3: Rank and Explain
+
+The program scores every study spot, sorts scores from highest to
+lowest, and displays the top three with explanations. Equal scores
+keep their original CSV order.
+
+### Navigator Question
+What would happen if you sorted ascending instead of descending?
+
+Sorting ascending would put the lowest scores first, making the
+first three results the weakest matches.
+
+## Part 4: Feature-Weighting Bias
+
+Giving noise more weight than distance can repeatedly push nearby,
+noisier spots below quieter options, creating a filter bubble that
+narrows which study spaces users see.
+
+### Navigator Question
+Who might be underserved by your current weighting?
+
+Students with limited mobility or short breaks between classes may
+be underserved because proximity may matter more to them than quietness.
+
+## Part 5: Pipeline Diagram
+
+### Navigator Question
+How is this flowchart different from the class diagrams you've drawn before?
+
+This flowchart shows how data moves through loading, scoring, ranking,
+and output. A class diagram shows classes, their attributes and methods,
+and how the classes relate to each other.
+
 ## Author
 
 **Haida Makouangou — UNC Charlotte Graduate**  

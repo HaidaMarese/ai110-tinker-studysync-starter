@@ -1,8 +1,8 @@
 """
 StudySync -- Find a Study Spot (Ticket 3, Tinker 3B).
 
-TICKET: none of the ranking logic is implemented yet -- every function
-below is a stub.
+Load study spots from CSV, score them against a student profile,
+rank the full collection, and explain the top results.
 """
 
 import csv
@@ -15,9 +15,17 @@ def load_study_spots(csv_path: str) -> list:
     Load study spots from a CSV into a list of dicts, converting
     "distance_miles" to float and "seats_available" to int.
     """
-    # TODO: use csv.DictReader to read csv_path into a list of dicts.
-    # TODO: convert row["distance_miles"] to float and row["seats_available"] to int for each row.
-    raise NotImplementedError
+    spots = []
+
+    with open(csv_path, newline="", encoding="utf-8-sig") as file:
+        reader = csv.DictReader(file)
+
+        for row in reader:
+            row["distance_miles"] = float(row["distance_miles"])
+            row["seats_available"] = int(row["seats_available"])
+            spots.append(row)
+
+    return spots
 
 
 def score_study_spot(profile: dict, spot: dict) -> tuple:
@@ -27,13 +35,54 @@ def score_study_spot(profile: dict, spot: dict) -> tuple:
     profile example: {"max_noise": "moderate", "max_distance": 1.0, "min_seats": 4}
 
     Return (score, reasons) where reasons is a list of short strings
-    explaining what contributed to the score, e.g. ["quiet enough", "close enough"].
+    explaining what contributed to the score.
     """
-    # TODO: implement additive/weighted scoring using at least noise_level
-    # (compare using NOISE_ORDER), distance_miles vs max_distance, and
-    # seats_available vs min_seats. Append a short string to `reasons` for
-    # each factor that contributed, whether it helped or hurt the score.
-    raise NotImplementedError
+    score = 0.0
+    reasons = []
+
+    # Noise match: 3 points.
+    noise_level = spot["noise_level"]
+    max_noise = profile["max_noise"]
+
+    if NOISE_ORDER[noise_level] <= NOISE_ORDER[max_noise]:
+        score += 3
+        reasons.append(
+            f"noise {noise_level} meets limit {max_noise} (+3)"
+        )
+    else:
+        reasons.append(
+            f"noise {noise_level} exceeds limit {max_noise} (+0)"
+        )
+
+    # Distance match: 2 points.
+    distance = spot["distance_miles"]
+    max_distance = profile["max_distance"]
+
+    if distance <= max_distance:
+        score += 2
+        reasons.append(
+            f"{distance:.1f} miles is within {max_distance:.1f} (+2)"
+        )
+    else:
+        reasons.append(
+            f"{distance:.1f} miles exceeds {max_distance:.1f} (+0)"
+        )
+
+    # Seating match: 1 point.
+    seats = spot["seats_available"]
+    min_seats = profile["min_seats"]
+
+    if seats >= min_seats:
+        score += 1
+        reasons.append(
+            f"{seats} seats meets minimum {min_seats} (+1)"
+        )
+    else:
+        reasons.append(
+            f"{seats} seats is below minimum {min_seats} (+0)"
+        )
+
+    return score, reasons
 
 
 def rank_study_spots(profile: dict, spots: list, k: int = 3) -> list:
@@ -41,16 +90,26 @@ def rank_study_spots(profile: dict, spots: list, k: int = 3) -> list:
     Score every study spot, then return the top k as (spot, score, reasons)
     tuples, sorted by score descending.
     """
-    # TODO: score every spot with score_study_spot(), then use
-    # sorted(..., key=..., reverse=True)[:k] to keep only the top k.
-    raise NotImplementedError
+    scored_spots = []
+
+    for spot in spots:
+        score, reasons = score_study_spot(profile, spot)
+        scored_spots.append((spot, score, reasons))
+
+    return sorted(
+        scored_spots,
+        key=lambda result: result[1],
+        reverse=True,
+    )[:max(0, k)]
 
 
 def format_results(ranked: list) -> None:
     """Print each ranked study spot with its score and reasons, one line each."""
-    # TODO: for each (spot, score, reasons) tuple, print a readable line, e.g.:
-    # "1. Innovation Commons -- Score: 5.0 -- Because: quiet enough, close enough"
-    raise NotImplementedError
+    for position, (spot, score, reasons) in enumerate(ranked, start=1):
+        print(
+            f"{position}. {spot['name']} -- Score: {score:.1f}"
+            f" -- Because: {', '.join(reasons)}"
+        )
 
 
 def render_study_spot_tab():
@@ -63,13 +122,11 @@ def render_study_spot_tab():
 
     if st.button("Find spots"):
         profile = {"max_noise": max_noise, "max_distance": max_distance, "min_seats": min_seats}
-        try:
-            spots = load_study_spots("data/study_spots.csv")
-            ranked = rank_study_spots(profile, spots, k=3)
-            for spot, score, reasons in ranked:
-                st.write(f"**{spot['name']}** -- Score: {score:.1f} -- Because: {', '.join(reasons)}")
-        except NotImplementedError:
-            st.warning("🚧 Ranking isn't implemented yet -- that's Tinker 3B's ticket.")
+        spots = load_study_spots("data/study_spots.csv")
+        ranked = rank_study_spots(profile, spots, k=3)
+
+        for spot, score, reasons in ranked:
+            st.write(f"**{spot['name']}** -- Score: {score:.1f} -- Because: {', '.join(reasons)}")
 
 
 if __name__ == "__main__":
