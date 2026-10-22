@@ -146,6 +146,19 @@ I used an AI coding assistant to investigate the relevant Python code, understan
 
 I treated the AI suggestions as hypotheses. I checked the suggested boundary test against the conditions in `session_rating()`, ran the test suite, and confirmed that the program produced identical results after the refactor.
 
+# Rank & Explain
+
+## Part 1: Load Real Data
+
+The loader uses csv.DictReader to read all 10 study spots.
+It converts distance_miles to float and seats_available to int.
+
+### Navigator Question
+Why would leaving distance_miles as a string break later code?
+
+Comparing a distance string with the profile's numeric maximum
+distance would raise a TypeError.
+
 ## Part 2: Scoring Weights
 
 Noise matters most because it has the largest weight—three points.
@@ -163,6 +176,12 @@ What would happen if you sorted ascending instead of descending?
 
 Sorting ascending would put the lowest scores first, making the
 first three results the weakest matches.
+
+## Run the ranking demo:
+
+```bash
+python ranking.py
+```
 
 ## Part 4: Feature-Weighting Bias
 
@@ -184,6 +203,10 @@ How is this flowchart different from the class diagrams you've drawn before?
 This flowchart shows how data moves through loading, scoring, ranking,
 and output. A class diagram shows classes, their attributes and methods,
 and how the classes relate to each other.
+
+### Diagram the Pipeline
+
+![StudySync ranking pipeline](images/ranking-pipeline.png)
 
 ## Author
 
